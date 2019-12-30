@@ -1,17 +1,38 @@
 name: Java CI
 
-on: [push]
+on: 
+  # Trigger the workflow on push or pull request,
+  # but only for the master branch
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  # Also trigger on page_build, as well as release created events
+  page_build:
+  release:
+    types: # This configuration does not affect the page_build event above
+      - created
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        java: [ 1.6, 6.0.83, 7, 7.0.181, 8, 8.0.192, 9.0.x]
     steps:
     - uses: actions/checkout@v1
-    - name: Set up JDK 1.8
+    - name: pinpoint
       uses: actions/setup-java@v1
       with:
-        java-version: 1.8
+        java-version: ${{ matrix.java }}
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    
+    env:
+      JAVA_6_HOME: /usr/local/openjdk-6
+      JAVA_7_HOME: /usr/local/openjdk-7
+      JAVA_8_HOME: /usr/local/openjdk-8
+      JAVA_9_HOME: /usr/local/openjdk-9
+      
